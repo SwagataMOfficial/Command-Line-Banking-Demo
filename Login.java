@@ -1,6 +1,8 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.Console;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 
@@ -45,6 +47,13 @@ public class Login {
             String line;
             while ((line = br.readLine()) != null) {
                 if (authString.equals(line)) {
+
+                    // creeating session for the loggedin user
+                    try (BufferedWriter bw = new BufferedWriter(new FileWriter("session.txt"))) {
+                        bw.write(email);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     return true;
                 }
             }
@@ -57,10 +66,44 @@ public class Login {
     public static void getCredentials(Scanner sc) {
         Console console = System.console();
 
-        System.out.print("Enter Your Email: ");
+        System.out.print("\nEnter Your Email: ");
         email = sc.next();
 
-        char[] passwordArray = console.readPassword("Enter Your Password: ");
+        char[] passwordArray = console.readPassword("\nEnter Your Password: ");
         password = new String(passwordArray);
+    }
+
+    public static boolean checkSession() {
+        // creating a new session for the current user
+        try (BufferedReader br = new BufferedReader(new FileReader("session.txt"))) {
+            String user = br.readLine();
+            if(user != null){
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static boolean logout()
+    {
+        // checking login validity
+        try (BufferedReader br = new BufferedReader(new FileReader("session.txt"))) {
+            String line = br.readLine();
+
+            if(line != null)
+            {
+                try (BufferedWriter bw = new BufferedWriter(new FileWriter("session.txt"))) {
+                    bw.write("");
+                    return true;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }
